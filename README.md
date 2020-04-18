@@ -1,0 +1,2 @@
+# mudbot
+Simple Mud Bot
