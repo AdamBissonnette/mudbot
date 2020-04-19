@@ -1,12 +1,13 @@
 from lib.store import Store
 
 class GameTime(Store):
+	gametime_update = "gametime.update"
 	gametime = ""
 
 	def __init__(self):
 		super().__init__()
 		self.notifications = {
-			"gametime.update": self.update
+			GameTime.gametime_update: self.update
 		}
 
 	def update(self, data):

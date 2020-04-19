@@ -20,6 +20,8 @@ class UserInput(Thread):
 		print("received {}".format(text))
 		if text == "time":
 			louie.send(data="time time time", signal="gametime.update")
+		if text == "inv":
+			louie.send(data="time time time", signal="inventory.you_have")
 		if text == "quit":
 			louie.send(signal="mudbot.killall")
 

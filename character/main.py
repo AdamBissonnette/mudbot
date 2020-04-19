@@ -1,6 +1,7 @@
 import louie
 from lib.thread import Thread
 from character.gametime import GameTime
+from character.inventory import Inventory
 
 #stores the stores, watches for updates louie notifications and performs updates
 class Character(object):
@@ -15,7 +16,7 @@ class Character(object):
 
 	def __init__(self):
 		super().__init__()
-		self.stores.append(GameTime())
+		self.stores = [GameTime(), Inventory()]
 		self.setup_stores()
 
 	def setup_stores(self):
