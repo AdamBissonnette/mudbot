@@ -1,4 +1,6 @@
 from lib.reaction import Reaction
+from character.gametime import GameTime
+from character.inventory import Inventory
 
 reactions = []
 
@@ -9,8 +11,8 @@ __exit = r"(?P<exit>[A-Za-z ]+)"
 
 reactions = [
 	Reaction("status.prompt", [r"\[(\d+) H (\d+) M\]: (You feel the benefits)?"], lambda m: {"hp": int(m.group(1)), "mp": int(m.group(2))}),
-	Reaction("inventory.you_have", [r"You have: " + __items + r"\.", lambda m: m]),
-	Reaction("inventory.wont_buy", [r'The shopkeep says, "I won\'t buy that rubbish from you\."', r"The shopkeep won't buy that from you\."])
+	Reaction(Inventory.signal_youhave, [r"You have: " + __items + r"\.", lambda m: m]),
+	Reaction(Inventory.signal_wontbuy, [r'The shopkeep says, "I won\'t buy that rubbish from you\."', r"The shopkeep won't buy that from you\."])
 ]
 sold = [r"The shopkeep gives you (\d+) gold for " + __item + r'\.']
 you_drop = [r"You drop " + __items + r"\."]

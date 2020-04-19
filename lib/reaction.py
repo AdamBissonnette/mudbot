@@ -16,7 +16,14 @@ class Reaction(object):
     def __init__(self, key, regex, parser=None):
         self.key = key
         self.regex = regex
-        self.parser = parser
-    
-    def send(self, text):
-        louie.send(data=self.parser(text), signal=self.key)
+
+        if parser is not None:
+            self.parser = parser
+        else:
+            self.parser = self.default_parser
+
+    def default_parser(self, match):
+        return match
+
+    def send(self, match):
+        louie.send(data=self.parser(match), signal=self.key)
