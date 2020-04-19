@@ -1,15 +1,29 @@
 import louie
-import threading
+import sys
 import time
-import atexit
+from lib.thread import Thread
+from character.main import Character
 
 class MudBot():
+	character = {}
 	def __init__(self):
+		super().__init__()
 		#instantiate everything
+		self.character = Character()
 
-	
+class UserInput(Thread):
+	def __init__(self):
+		super().__init__()
 
+	def do_action(self):
+		text = input()
+		print("received {}".format(text))
+		if text == "time":
+			louie.send(data="time time time", signal="gametime.update")
+		if text == "quit":
+			louie.send(signal="mudbot.killall")
 
 if __name__ == '__main__':
 	M = MudBot()
-	m.main()
+	I = UserInput()
+	I.start()
