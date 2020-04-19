@@ -13,7 +13,6 @@ class Inventory(Store):
 
 	def you_have(self, data):
 		print("inventory updated {}".format(data))
-		}
 
 	def wont_buy(self):
 		print("inventory updated {}".format(data))
