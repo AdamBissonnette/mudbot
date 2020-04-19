@@ -15,4 +15,4 @@ class Inventory(Store):
 		print("inventory updated {}".format(data))
 
 	def wont_buy(self):
-		print("inventory updated {}".format(data))
+		print("wont buy noticed")
