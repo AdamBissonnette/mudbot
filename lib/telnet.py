@@ -1,3 +1,4 @@
+import sys
 import telnetlib
 import socket
 import time
@@ -52,17 +53,6 @@ class Telnet(Thread, Store):
 			self.tn.close()
 		louie.send(signal=Telnet.signal_closed)
 
-	def get_socket(self):
-		return self.tn.get_socket()
-
-	def read_some(self):
-		try:
-			return self.tn.read_some()
-			# louie.send(data=self.tn.read_some(), signal=Telnet.read_some)  # read_eager() would miss characters
-		except Exception:
-			return ""
-			# louie.send(data='', signal=Telnet.read_some)
-
 	def write(self, text):
 		self.set_timer()
 		text += '\r'
@@ -73,7 +63,7 @@ class Telnet(Thread, Store):
 
 		louie.send(data=text, signal=Telnet.signal_write_sent)
 
-	def run(self):
+	def do_action(self):
 		if not self.connected:
 			try:
 				self.tn = telnetlib.Telnet(self.server, self.port, 25)
@@ -85,15 +75,15 @@ class Telnet(Thread, Store):
 		else:
 			fragment = ""
 			select_out = ([], [], [])
-			socket_number = self.get_socket()
+			socket_number = self.tn.get_socket()
 			try:
 				select_out = select.select([socket_number], [], [], self.select_timeout)
 			except ValueError:
 				pass
-				
+			
 			if (select_out != ([], [], []) or socket_number == 1):
 				try:
-					fragment += self.read_some().decode('ascii', errors='ignore')
+					fragment += self.tn.read_some().decode('ascii', errors='ignore')
 					print(fragment)
 				except (EOFError, OSError):
 					louie.send(signal=Telnet.signal_crashed)

@@ -16,12 +16,9 @@ class MudBot():
 		self.character = Character()
 		self.telnet = Telnet('mud.landsofstone.org', 4801)
 		self.stores += self.character.stores
-		print(self.stores)
 		self.stores.append(self.telnet)
-		print(self.stores)
 		self.setup_stores()
-
-		# self.telnet.start()
+		self.telnet.start()
 	
 	def setup_stores(self):
 		for store in self.stores:
