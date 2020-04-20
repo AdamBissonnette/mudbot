@@ -1,5 +1,5 @@
 from lib.reaction import Reaction
-from character.gametime import GameTime
+from character.status import Status
 from character.inventory import Inventory
 
 reactions = []
@@ -10,24 +10,54 @@ __player = r"(?P<player>[A-Za-z]+)"
 __exit = r"(?P<exit>[A-Za-z ]+)"
 
 reactions = [
-	Reaction("status.prompt", [r"\[(\d+) H (\d+) M\]: (You feel the benefits)?"], lambda m: {"hp": int(m.group(1)), "mp": int(m.group(2))}),
-	Reaction(Inventory.signal_youhave, [r"You have: " + __items + r"\.", lambda m: m]),
-	Reaction(Inventory.signal_wontbuy, [r'The shopkeep says, "I won\'t buy that rubbish from you\."', r"The shopkeep won't buy that from you\."])
+	Reaction(Status.prompt,
+        [r"\[(\d+) H (\d+) M\]: (You feel the benefits)?"],
+        lambda m: {"hp": int(m.group(1)), "mp": int(m.group(2))}),
+	Reaction(Inventory.signal_youhave,
+        [r"You have: " + __items + r"\.",
+        lambda m: m]),
+	Reaction(Inventory.signal_wontbuy,
+        [r'The shopkeep says, I won\'t buy that rubbish from you\."',
+        r"The shopkeep won't buy that from you\."]),
+    Reaction(Inventory.signal_itemsold,
+        [r"The shopkeep gives you (\d+) gold for " + __item + r'\.'],
+        lambda m: {"gold": m.group(1)}, m.group(2)),
+    Reaction(Inventory.signal_itemdropped,
+        [r"You drop " + __items + r"\."],
+        lambda m: m),
+    Reaction(Inventory.signal_itemdestroyed,
+        [r"(?: A | Some) " + __item + r" disintegrates\."],
+        lambda m: m
+    ),
+    Reaction(Status.signal_goldreceived,
+        [r"You have(?:now)? (\d+) gold\."],
+        lambda m: int(m.group(1))
+    ),
+    Reaction("Area.not_a_pawn_shop",
+        [r"This is not a pawn shoppe\."]),
+    # Reaction("Status.gold",
+    #   [r"You now have (\d+) gold pieces\."],
+    #   lambda m: m),
+    Reaction(Inventory.signal_itemnotempty,
+        [r"It isn't empty!"]),
+    Reaction(Inventory.signal_wearitems,
+        [r"You wear " + __items + r"\."],
+        lambda m: m
+    ),
+    Reaction(Inventory.signal_nothingtowear,
+        [r"You have nothing you can wear\."]),
+    Reaction(Inventory.signal_yougetitems,
+        [r"You get " + __items + r"\."],
+        lambda m: m
+    ),
+    Reaction(Inventory.signal_removeitems,
+        [r"You removed? " + __items + r"\."]
+    )
 ]
-sold = [r"The shopkeep gives you (\d+) gold for " + __item + r'\.']
-you_drop = [r"You drop " + __items + r"\."]
-disintegrates = [r"(?:A|Some) " + __item + r" disintegrates\."]
-gold_from_tip = [r"You have (\d+) gold\."]
-not_a_pawn_shop = [r"This is not a pawn shoppe\."]
-you_now_have = [r"You now have (\d+) gold pieces\."]
-not_empty = [r"It isn't empty!"]
-you_wear = [r"You wear " + __items + r"\."]
-nothing_to_wear = [r"You have nothing you can wear\."]
+
 # you_get = [r"(?s)[^ ]You get (.+?)\.(?:\nYou now have (.+?) gold pieces\.)?"]
 # you_get = [r"[^ ]You get " + __items + r"\."]  # We don't want this to miss because getting can happen in combat - maybe it shouldn't
 # still TODO: deal with false positive on "You get the vague..." ... hard to deal with in regex
-you_get = [r"You get " + __items + r"\."]
-you_remove = [r"You removed? " + __items + r"\."]
 nothing_to_remove = [r"You aren't wearing anything that can be removed\."]
 # you_wield = [r"You wield (.+?)( in your off hand)?\."]
 you_give = [r"You give " + __items + r" to " + __player + r"\."]
