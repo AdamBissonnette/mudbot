@@ -1,6 +1,6 @@
 import sys
-import telnetlib
-import socket
+import telnetlib3
+import asyncio
 import time
 import louie
 import select
@@ -12,6 +12,7 @@ class Telnet(Thread, Store):
 	signal_connected = "telnet.connected"
 	signal_write = "telnet.write"
 	signal_write_sent = "telnet.write_sent"
+	signal_read = "telnet.read"
 	signal_closed = "telnet.closed"
 	signal_crashed = "telnet.crashed"
 
@@ -20,8 +21,12 @@ class Telnet(Thread, Store):
 	server_timeout = 299
 	select_timeout = 2
 	connected = False
+	stopping = False
 
+	loop = None
 	tn = None
+	reader = None
+	writer = None
 
 	def __init__(self, server, port):
 		super().__init__()
@@ -35,65 +40,43 @@ class Telnet(Thread, Store):
 
 		self.server = server
 		self.port = port
-
-		self.notifications = {
-			Telnet.signal_write: self.write,
-			Telnet.signal_disconnect: self.close
-		}
+		self.loop = asyncio.new_event_loop()
 
 	def set_timer(self):
 		self.timer = time.time() + self.server_timeout
 
 	def stop(self):
-		super().stop()
 		self.close()
 
 	def close(self):
-		if self.tn is not None:
-			self.tn.close()
+		self.stopping = True
 		louie.send(signal=Telnet.signal_closed)
 
 	def write(self, text):
-		self.set_timer()
-		text += '\r'
-		try:
-			self.tn.write(text.encode('ascii'))
-		except socket.error:
-			raise socket.error
-
+		self.writer.write(text + "\n")
 		louie.send(data=text, signal=Telnet.signal_write_sent)
+
+	@asyncio.coroutine
+	def shell(self, reader, writer):
+		while not self.stopping:
+			outp = yield from reader.read(1024)
+			sys.stdout.write(outp)
+			sys.stdout.flush()
+			if 'Goodbye! Come back soon.' in outp:
+				self.stopping = True
+
+		return
 
 	def do_action(self):
 		if not self.connected:
-			try:
-				self.tn = telnetlib.Telnet(self.server, self.port, 25)
-				self.connected = True
-				louie.send(signal=Telnet.signal_connected)
-			except socket.error:
-				self.connected = False
-				time.sleep(5)
-		else:
-			fragment = ""
-			select_out = ([], [], [])
-			socket_number = self.tn.get_socket()
-			try:
-				select_out = select.select([socket_number], [], [], self.select_timeout)
-			except ValueError:
-				pass
-			
-			if (select_out != ([], [], []) or socket_number == 1):
-				try:
-					fragment += self.tn.read_some().decode('ascii', errors='ignore')
-					sys.stdout.write(fragment)
-				except (EOFError, OSError):
-					louie.send(signal=Telnet.signal_crashed)
-			else:
-				pass
+			asyncio.set_event_loop(self.loop)
+			coro = telnetlib3.open_connection(self.server, self.port, shell=self.shell)
+			self.reader, self.writer = self.loop.run_until_complete(coro)
+			self.loop.run_until_complete(self.writer.protocol.waiter_closed)
+			self.loop.stop()
+			# Find all running tasks:
+			pending = asyncio.Task.all_tasks()
 
-		# The server times out every 5 minutes - I'd prefer it to be 10 minutes,
-		# so I send a 'rest' command when we're about to time out.
-		# else:
-		# 	if self.timer > time.time():
-		# 		time.sleep(max(0, self.timer - time.time()))
-		# 	self.tn.write('rest\r'.encode('ascii'))
-		# 	time.sleep(self.server_timeout)
+			# Run loop until tasks done:
+			self.loop.run_until_complete(asyncio.gather(*pending))
+			print("shutdown complete")

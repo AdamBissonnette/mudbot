@@ -37,7 +37,7 @@ class UserInput(Thread):
 		
 		louie.send(text=text, signal=Telnet.signal_write)
 
-		if text == "quit":
+		if text == "!exit":
 			louie.send(signal="mudbot.killall")
 
 if __name__ == '__main__':
