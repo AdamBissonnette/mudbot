@@ -84,7 +84,7 @@ class Telnet(Thread, Store):
 			if (select_out != ([], [], []) or socket_number == 1):
 				try:
 					fragment += self.tn.read_some().decode('ascii', errors='ignore')
-					print(fragment)
+					sys.stdout.write(fragment)
 				except (EOFError, OSError):
 					louie.send(signal=Telnet.signal_crashed)
 			else:

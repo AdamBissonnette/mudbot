@@ -1,6 +1,7 @@
 from lib.reaction import Reaction
 from character.status import Status
 from character.inventory import Inventory
+from gamedata.parser.status import *
 
 reactions = []
 
@@ -12,10 +13,11 @@ __exit = r"(?P<exit>[A-Za-z ]+)"
 reactions = [
 	Reaction(Status.prompt,
         [r"\[(\d+) H (\d+) M\]: (You feel the benefits)?"],
-        lambda m: {"hp": int(m.group(1)), "mp": int(m.group(2))}),
+        lambda m: {Prompt.parse(m)}
+    ),
 	Reaction(Inventory.signal_youhave,
-        [r"You have: " + __items + r"\.",
-        lambda m: m]),
+        [r"You have: " + __items + r"\."],
+        lambda m: m),
 	Reaction(Inventory.signal_wontbuy,
         [r'The shopkeep says, I won\'t buy that rubbish from you\."',
         r"The shopkeep won't buy that from you\."]),

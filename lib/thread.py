@@ -6,7 +6,7 @@ class Thread(threading.Thread):
     stopping = False
     kill_signal = "mudbot.killall"
     stop_signal = "mudbot.stop"
-    timeout = 0.2
+    timeout = 0.02
 
     def __init__(self):
         super().__init__()

@@ -34,11 +34,9 @@ class UserInput(Thread):
 
 	def do_action(self):
 		text = input()
-		print("received {}".format(text))
-		if text == "time":
-			louie.send(data="time time time", signal="gametime.update")
-		if text == "inv":
-			louie.send(data="time time time", signal="inventory.you_have")
+		
+		louie.send(text=text, signal=Telnet.signal_write)
+
 		if text == "quit":
 			louie.send(signal="mudbot.killall")
 
