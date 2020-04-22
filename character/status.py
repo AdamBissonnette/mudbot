@@ -1,4 +1,5 @@
 from lib.store import Store
+from gamedata.parser_status import *
 
 class Status(Store):
 	signal_gametime = "status.gametime"
@@ -18,7 +19,8 @@ class Status(Store):
 
 	def gametime(self, data):
 		print("time updated {}".format(data))
-		self.set("gametime", data)
+		# self.set("gametime", data)
 
-	def prompt(self, data):
-		print(data)
+	def prompt(self, data: Prompt):
+		self.hp = data.hp
+		self.mp = data.mp
